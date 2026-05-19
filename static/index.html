@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Extrator e Sanitizador Automático de PDFs sob conformidade com a LGPD. Extração estruturada de textos e tabelas com anonimização via Regex de CPFs, CNPJs e dados bancários.">
+    <meta name="author" content="Antigravity LGPD Engine">
+    <title>Extrator & Sanitizador de PDFs (Conformidade LGPD)</title>
+    
+    <!-- Google Fonts: Inter (Body) & Outfit (Titles) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Link to premium stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background visual gradient accents -->
+    <div class="bg-gradient-glow top-left"></div>
+    <div class="bg-gradient-glow bottom-right"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="app-header glass-card animate-fade-in">
+            <div class="header-logo-container">
+                <div class="header-shield-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 11 2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="app-title">PDF Sanitizer</h1>
+                    <p class="app-subtitle">Extrator e Sanitizador Automático de Documentos (LGPD)</p>
+                </div>
+            </div>
+            <div class="header-status-badge">
+                <span class="pulse-indicator"></span>
+                <span>Motor LGPD Ativo v1.0</span>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- UPLOAD PANEL -->
+            <section id="upload-section" class="upload-panel glass-card animate-scale-in">
+                <div class="upload-area" id="drop-zone">
+                    <div class="upload-icon-container">
+                        <svg class="upload-arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h2>Arraste e solte seu arquivo PDF aqui</h2>
+                    <p>Ou clique para navegar em suas pastas</p>
+                    <div class="upload-limits">Suporta arquivos PDF de até 25MB • Extração total de textos e tabelas estruturadas</div>
+                    
+                    <input type="file" id="file-input" accept=".pdf" class="hidden-file-input">
+                </div>
+            </section>
+
+            <!-- SCANNING / PROCESSING STATE -->
+            <section id="processing-section" class="processing-panel glass-card hidden">
+                <div class="scanner-container">
+                    <div class="scanner-shield">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <div class="scan-laser"></div>
+                    </div>
+                    <h2>Analisando Documento...</h2>
+                    <p id="process-step" class="process-step-text">Iniciando upload de dados...</p>
+                    
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-bar"></div>
+                    </div>
+                    
+                    <div class="processing-steps-list">
+                        <div class="step-item active" id="step-upload">
+                            <span class="step-bullet"></span> Upload e Validação
+                        </div>
+                        <div class="step-item" id="step-extract">
+                            <span class="step-bullet"></span> Extração de Texto e Tabelas
+                        </div>
+                        <div class="step-item" id="step-sanitize">
+                            <span class="step-bullet"></span> Sanitização Baseada em Regras da LGPD
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESULTS WORKSPACE -->
+            <section id="results-section" class="results-workspace hidden animate-fade-in">
+                <!-- METRICS GRID -->
+                <div class="metrics-grid">
+                    <div class="metric-card glass-card">
+                        <div class="metric-info">
+                            <span class="metric-label">Páginas Processadas</span>
+                            <span class="metric-value" id="meta-pages">0</span>
+                        </div>
+                        <div class="metric-icon pages">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card glass-card warning">
+                        <div class="metric-info">
+                            <span class="metric-label">Dados Mascarados</span>
+                            <span class="metric-value" id="total-masked">0</span>
+                        </div>
+                        <div class="metric-icon warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                    </div>
+
+                    <div class="metric-card glass-card info">
+                        <div class="metric-info">
+                            <span class="metric-label">Tabelas Identificadas</span>
+                            <span class="metric-value" id="total-tables">0</span>
+                        </div>
+                        <div class="metric-icon info">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN DISPLAY BOARD (TABS & CONTENT) -->
+                <div class="display-board glass-card">
+                    <!-- Tab Headers -->
+                    <nav class="board-tabs" aria-label="Navegação de Resultados">
+                        <button class="tab-btn active" data-tab="overview">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                            Visão Geral
+                        </button>
+                        <button class="tab-btn" data-tab="text-view">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            Texto Higienizado
+                        </button>
+                        <button class="tab-btn" data-tab="tables-view" id="tab-tables-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+                            Tabelas Estruturadas
+                        </button>
+                        <button class="tab-btn" data-tab="audit-view">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Trilha de Auditoria LGPD
+                        </button>
+                    </nav>
+
+                    <!-- Tab Contents -->
+                    <div class="board-content">
+                        <!-- OVERVIEW TAB -->
+                        <div class="tab-panel active" id="panel-overview">
+                            <div class="overview-layout">
+                                <div class="overview-details">
+                                    <h3 class="section-title">Dados do Arquivo</h3>
+                                    <table class="details-table">
+                                        <tr>
+                                            <th>Nome do Arquivo:</th>
+                                            <td id="info-filename">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Título (Metadados):</th>
+                                            <td id="info-title">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Autor / Criador:</th>
+                                            <td id="info-author">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tamanho do Arquivo:</th>
+                                            <td id="info-size">-</td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <div class="download-all-actions">
+                                        <button class="btn btn-primary" id="btn-download-json">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Exportar Relatório JSON Completo
+                                        </button>
+                                        <button class="btn btn-secondary" id="btn-download-text">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Baixar Texto Higienizado (.txt)
+                                        </button>
+                                        <button class="btn btn-outline" id="btn-reset">
+                                            Analisar Outro PDF
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="overview-stats">
+                                    <h3 class="section-title">Análise de Dados Sensíveis (LGPD)</h3>
+                                    <div class="stats-bar-chart" id="bar-chart-container">
+                                        <!-- Will be rendered dynamically via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TEXT COMPARISON VIEW -->
+                        <div class="tab-panel" id="panel-text-view">
+                            <div class="text-view-header">
+                                <div>
+                                    <span class="text-badge original">Texto Original</span>
+                                    <span class="text-badge sanitized">Texto Sanitizado</span>
+                                </div>
+                                <div class="pagination-container">
+                                    <button class="pagination-btn" id="btn-page-prev">Anterior</button>
+                                    <span class="pagination-label">Página <span id="current-page-num">1</span> de <span id="total-page-num">1</span></span>
+                                    <button class="pagination-btn" id="btn-page-next">Próxima</button>
+                                </div>
+                            </div>
+                            
+                            <div class="split-text-container">
+                                <div class="text-pane-wrapper">
+                                    <div class="text-pane original-pane" id="pane-original-text" dir="ltr">
+                                        <!-- Original text with highlighted markup -->
+                                    </div>
+                                </div>
+                                <div class="text-pane-wrapper">
+                                    <div class="text-pane sanitized-pane" id="pane-sanitized-text" dir="ltr">
+                                        <!-- Sanitized text -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABLES VIEW -->
+                        <div class="tab-panel" id="panel-tables-view">
+                            <div class="tables-view-header">
+                                <div class="table-selector-wrapper">
+                                    <label for="table-select" class="form-label">Tabela Detectada:</label>
+                                    <select id="table-select" class="form-select">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                    <span class="table-page-location" id="table-page-location">Página -</span>
+                                </div>
+                                <div class="table-actions">
+                                    <div class="table-view-toggle">
+                                        <button class="toggle-btn active" id="toggle-table-sanitized">Ocultar Sensível</button>
+                                        <button class="toggle-btn" id="toggle-table-original">Mostrar Sensível</button>
+                                    </div>
+                                    <button class="btn btn-secondary btn-sm" id="btn-download-table-csv">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        Baixar CSV
+                                    </button>
+                                    <button class="btn btn-outline btn-sm" id="btn-download-table-json">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        Baixar JSON
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive-container">
+                                <table class="extracted-table-grid" id="extracted-table">
+                                    <!-- Rendered dynamically -->
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- AUDIT TRAIL VIEW -->
+                        <div class="tab-panel" id="panel-audit-view">
+                            <div class="audit-header">
+                                <h3 class="section-title">Registros de Incidentes e Dados Removidos</h3>
+                                <p class="section-desc">Detalhamento dos elementos identificados pelo motor Regex. Use esta lista para validar as conformidades regulatórias da LGPD.</p>
+                            </div>
+                            
+                            <div class="table-responsive-container">
+                                <table class="audit-log-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Pág</th>
+                                            <th>Categoria</th>
+                                            <th>Dado Identificado (Antes)</th>
+                                            <th>Máscara Aplicada (Depois)</th>
+                                            <th>Contexto de Ocorrência</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="audit-log-tbody">
+                                        <!-- Rendered dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2026 PDF Sanitizer LGPD Engine • Processamento de Segurança Local • Suas informações não saem deste computador.</p>
+        </footer>
+    </div>
+
+    <!-- Link to premium script -->
+    <script src="app.js"></script>
+</body>
+</html>

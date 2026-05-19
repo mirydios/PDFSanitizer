@@ -1,0 +1,22 @@
+# Python virtual environment
+.venv/
+env/
+venv/
+ENV/
+
+# Python compiled files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Project generated test files
+test_document.pdf
+
+# IDE directories
+.vscode/
+.idea/
